@@ -8,9 +8,9 @@ Sistema de Digital Twin para monitoreo, simulación y representación virtual de
 
 pip install numpy opencv-python flask paho-mqtt
 
----
-
 ## 🏗️ Estructura del Proyecto
+
+```
 
 .
 ├── main.py               # Punto de entrada del sistema
@@ -31,7 +31,7 @@ pip install numpy opencv-python flask paho-mqtt
 ├── logs/                # Registros del sistema
 └── README.md
 
----
+```
 
 ## 🚀 Instrucciones de Uso
 
