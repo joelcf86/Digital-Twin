@@ -6,7 +6,7 @@ Sistema de Digital Twin para monitoreo, simulación y representación virtual de
 
 ## 📋 Requisitos
 
-pip install numpy opencv-python flask paho-mqtt
+`pip install numpy opencv-python flask paho-mqtt`
 
 ## 🏗️ Estructura del Proyecto
 
@@ -35,20 +35,20 @@ pip install numpy opencv-python flask paho-mqtt
 
 ## 🚀 Instrucciones de Uso
 
-1. Clonar repositorio:
-git clone https://github.com/joelcf86/Digital-Twin.git
-cd Digital-Twin
+- `1` Clonar repositorio:
+`git clone https://github.com/joelcf86/Digital-Twin.git`
+`cd Digital-Twin`
 
-2. Instalar dependencias:
-pip install -r requirements.txt
+- `2` Instalar dependencias:
+`pip install -r requirements.txt`
 
-3. Configurar sistema en config.py
+- `3` Configurar sistema en config.py
 
-4. Ejecutar:
-python main.py
+- `4` Ejecutar:
+`python main.py`
 
-5. Dashboard:
-http://localhost:5000
+- `5` Dashboard:
+http://localhost:8000
 
 ---
 
@@ -64,9 +64,9 @@ http://localhost:5000
 
 ## ⚙️ MQTT
 
-mosquitto -v
+`mosquitto -v`
 
-mosquitto_pub -t sensors/data -m "25,60"
+`mosquitto_pub -t sensors/data -m "25,60"`
 
 ---
 
@@ -83,7 +83,7 @@ mosquitto_pub -t sensors/data -m "25,60"
 ## ⚠️ Problemas
 
 - MQTT no conecta: revisa broker
-- Dashboard no abre: revisa puerto 5000
+- Dashboard no abre: revisa puerto 8000
 - Datos incorrectos: revisa formato MQTT
 
 ---
