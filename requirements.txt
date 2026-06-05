@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+jinja2
+websockets
+paho-mqtt
+pandas
+numpy
+pickle

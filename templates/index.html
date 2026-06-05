@@ -1,0 +1,518 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Twin</title>
+
+    <style>
+        
+    body{
+        margin:0;
+        overflow:hidden;
+    }
+
+    canvas{
+        display:block;
+    }
+    #dashboard{
+
+    position:absolute;
+
+    top:20px;
+    left:20px;
+
+    width:320px;
+
+    background:rgba(20,20,20,0.90);
+
+    backdrop-filter:blur(10px);
+
+    border-radius:15px;
+
+    padding:20px;
+
+    color:white;
+
+    font-family:'Segoe UI',sans-serif;
+
+    z-index:1000;
+
+    box-shadow:
+    0 0 20px rgba(0,0,0,0.4);
+
+}
+
+#dashboard h2{
+
+    margin-top:0;
+
+    text-align:center;
+
+    color:#00d4ff;
+
+}
+
+.item{
+
+    margin-bottom:15px;
+
+}
+
+.bar{
+
+    width:100%;
+
+    height:18px;
+
+    background:#333;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    margin-top:5px;
+
+    margin-bottom:5px;
+
+}
+
+.fill{
+
+    width:0%;
+
+    height:100%;
+
+    transition:0.5s;
+
+    background:linear-gradient(
+        90deg,
+        #00ff88,
+        #00d4ff
+    );
+
+}
+
+.status-box{
+
+    margin-top:20px;
+
+    padding:15px;
+
+    border-radius:10px;
+
+    text-align:center;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    background:#222;
+
+}
+
+#statusText{
+
+    margin-bottom:10px;
+
+}
+
+#confidenceText{
+
+    font-size:14px;
+
+    color:#cccccc;
+
+}
+
+    </style >
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+
+    </head>
+
+    <body>
+        <div id="dashboard">
+
+    <h2>Digital Twin Monitor</h2>
+
+        <div class="item">
+            <span>🌡 Temperatura</span>
+            <div class="bar">
+                <div id="tempBar" class="fill"></div>
+            </div>
+            <span id="tempValue">0 °C</span>
+        </div>
+
+        <div class="item">
+            <span>💧 Humedad</span>
+            <div class="bar">
+                <div id="humBar" class="fill"></div>
+            </div>
+            <span id="humValue">0 %</span>
+        </div>
+
+        <div class="item">
+            <span>⚙ Posición</span>
+            <div class="bar">
+                <div id="posBar" class="fill"></div>
+            </div>
+            <span id="posValue">0</span>
+        </div>
+
+        <div class="status-box">
+            <div id="statusText">
+                STATUS: OK
+            </div>
+
+            <div id="confidenceText">
+                Confianza: 0%
+            </div>
+        </div>
+
+    </div>
+    <script type="module">
+
+    import * as THREE from "three";
+
+    import { GLTFLoader } from
+    "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js";
+
+    import { OrbitControls } from
+    "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+
+    console.log("Three.js iniciado");
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x202020);
+
+    const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+
+    camera.position.set(20,10,20);
+
+    const renderer = new THREE.WebGLRenderer({
+        antialias:true
+    });
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+    document.body.appendChild(
+        renderer.domElement
+    );
+
+    const controls = new OrbitControls(
+        camera,
+        renderer.domElement
+    );
+
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.target.set(0,0,0);
+
+    const ambient = new THREE.AmbientLight(
+        0xffffff,
+        2
+    );
+
+    scene.add(ambient);
+
+    const directional = new THREE.DirectionalLight(
+        0xffffff,
+        3
+    );
+
+    directional.position.set(
+        10,
+        20,
+        10
+    );
+
+    scene.add(directional);
+
+    const grid = new THREE.GridHelper(
+        100,
+        100
+    );
+
+    scene.add(grid);
+
+    const axes = new THREE.AxesHelper(
+        5
+    );
+
+    scene.add(axes);
+
+    const loader = new GLTFLoader();
+
+    let robot = null;
+    let cnc = null;
+    let conveyor = null;
+
+    loader.load(
+        "/static/robot.glb",
+        function(gltf){
+
+            robot = gltf.scene;
+
+            robot.position.set(
+                1.5,
+                0.8,
+                1.5
+            );
+
+            scene.add(robot);
+
+            console.log("Robot cargado");
+        },
+        undefined,
+        function(error){
+            console.error(error);
+        }
+    );
+
+    loader.load(
+        "/static/cnc.glb",
+        function(gltf){
+
+            cnc = gltf.scene;
+
+            cnc.position.set(
+                0,
+                0.8,
+                0
+            );
+
+            scene.add(cnc);
+
+            console.log("CNC cargada");
+        },
+        undefined,
+        function(error){
+            console.error(error);
+        }
+    );
+
+    loader.load(
+        "/static/conveyer.glb",
+        function(gltf){
+
+            conveyor = gltf.scene;
+
+            conveyor.position.set(
+                3.5,
+                0,
+                1.5
+            );
+
+            scene.add(conveyor);
+
+            console.log("Conveyor cargado");
+        },
+        undefined,
+        function(error){
+            console.error(error);
+        }
+    );
+
+    const socket = new WebSocket(
+        "ws://localhost:8000/ws"
+    );
+
+    socket.onopen = function(){
+        console.log("WebSocket conectado");
+    };
+socket.onmessage = function(event){
+
+    const data = JSON.parse(event.data);
+
+    console.log("Datos recibidos:", data);
+
+    // ==========================
+    // VARIABLES
+    // ==========================
+
+    const temp = data.temperature || 0;
+    const hum = data.humidity || 0;
+    const pos = data.position || 0;
+    const conf = (data.confidence || 0) * 100;
+
+    // ==========================
+    // DASHBOARD
+    // ==========================
+
+    document.getElementById("tempValue").innerText =
+        temp.toFixed(1) + " °C";
+
+    document.getElementById("humValue").innerText =
+        hum.toFixed(1) + " %";
+
+    document.getElementById("posValue").innerText =
+        pos;
+
+    document.getElementById("confidenceText").innerText =
+        "Confianza: " + conf.toFixed(1) + "%";
+
+    document.getElementById("tempBar").style.width =
+        Math.min((temp / 60) * 100, 100) + "%";
+
+    document.getElementById("humBar").style.width =
+        Math.min(hum, 100) + "%";
+
+    document.getElementById("posBar").style.width =
+        Math.min((pos / 1000) * 100, 100) + "%";
+
+    // ==========================
+    // STATUS
+    // ==========================
+
+    const statusDiv =
+        document.getElementById("statusText");
+
+    statusDiv.innerText =
+        "STATUS: " + (data.fault_type || "NONE");
+
+    let color = 0x00ff00;
+
+    switch(data.fault_type){
+
+        case "OVERHEAT":
+
+            color = 0xff0000;
+            statusDiv.style.color = "#ff3b30";
+
+            break;
+
+        case "HIGH_HUMIDITY":
+
+            color = 0xffff00;
+            statusDiv.style.color = "#ffd60a";
+
+            break;
+
+        case "POSITION_ERROR":
+
+            color = 0xff00ff;
+            statusDiv.style.color = "#bf5af2";
+
+            break;
+
+        case "MULTIPLE_FAULTS":
+
+            color = 0xff8800;
+            statusDiv.style.color = "#ff9500";
+
+            break;
+
+        default:
+
+            color = 0x00ff00;
+            statusDiv.style.color = "#30d158";
+
+            break;
+    }
+
+    // ==========================
+    // CAMBIAR COLOR MODELOS
+    // ==========================
+
+    const models = [
+        robot,
+        cnc,
+        conveyor
+    ];
+
+    models.forEach(model => {
+
+        if(!model) return;
+
+        model.traverse(node => {
+
+            if(node.isMesh){
+
+                if(!node.userData.colorInit){
+
+                    node.material =
+                        node.material.clone();
+
+                    node.userData.colorInit = true;
+
+                }
+
+                node.material.color.setHex(
+                    color
+                );
+
+            }
+
+        });
+
+    });
+
+};
+
+
+    window.addEventListener(
+        "resize",
+        function(){
+
+            camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(
+                window.innerWidth,
+                window.innerHeight
+            );
+
+        }
+    );
+
+
+    let tiempo = 0;
+
+    function animate(){
+
+        requestAnimationFrame(
+            animate
+        );
+
+        tiempo += 0.01;
+
+        if(robot){
+
+            robot.rotation.y =
+            ((Math.sin(tiempo) + 1) / 2)
+            * Math.PI;
+
+        }
+
+        controls.update();
+
+        renderer.render(
+            scene,
+            camera
+        );
+
+    }
+
+    animate();
+
+    </script>
+
+    </body>
+    </html>
